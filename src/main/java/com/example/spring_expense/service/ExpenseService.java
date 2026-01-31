@@ -12,6 +12,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.util.List;
+
 @Service
 public class ExpenseService {
 
@@ -38,6 +40,14 @@ public class ExpenseService {
         expense.setUser(user);
 
         expenseRepository.save(expense);
+    }
+
+    public List<Expense> getAllExpenses(Long userId) {
+        if(!userRepository.existsById(userId)) {
+           throw new ResponseStatusException(HttpStatus.NOT_FOUND, "User with ID: " + userId + "not found");
+        }
+
+        return expenseRepository.findByUserId(userId);
     }
 
 
