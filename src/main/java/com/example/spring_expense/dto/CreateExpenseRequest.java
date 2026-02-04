@@ -1,7 +1,10 @@
 package com.example.spring_expense.dto;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
-import jakarta.validation.constraints.*;
+import jakarta.validation.constraints.DecimalMax;
+import jakarta.validation.constraints.DecimalMin;
+import jakarta.validation.constraints.Digits;
+import jakarta.validation.constraints.NotNull;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,6 +25,5 @@ public class CreateExpenseRequest {
     @Digits(integer = 8, fraction = 2)
     private BigDecimal amount;
 
-    @Size(min = 3)
     private String description;
 }
