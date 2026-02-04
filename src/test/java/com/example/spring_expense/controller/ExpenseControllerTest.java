@@ -1,6 +1,7 @@
 package com.example.spring_expense.controller;
 
 import com.example.spring_expense.dto.CreateExpenseRequest;
+import com.example.spring_expense.dto.UpdateExpenseRequest;
 import com.example.spring_expense.entity.Expense;
 import com.example.spring_expense.entity.User;
 import com.example.spring_expense.repository.CategoryRepository;
@@ -220,6 +221,38 @@ public class ExpenseControllerTest {
                 .with(user("test").password("test123"))
                 .accept(MediaType.APPLICATION_JSON)
                 .contentType(MediaType.APPLICATION_JSON)
+        ).andExpectAll(status().isOk());
+    }
+
+    @Test
+    void testUpdateExpenseSuccess() throws Exception {
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(encoder.encode("test123"));
+
+        userRepository.save(user);
+
+        String userId = user.getId().toString();
+
+        Expense expense = new Expense();
+        expense.setAmount(new BigDecimal("100000.00"));
+        expense.setDescription("Buying groceries");
+        expense.setUser(user);
+
+        expenseRepository.save(expense);
+
+        String expenseId = expense.getId().toString();
+
+        UpdateExpenseRequest request = new UpdateExpenseRequest();
+        request.setAmount(new BigDecimal("200000.00"));
+        request.setDescription("Buying new shoes");
+
+        mockMvc.perform(patch("/api/expenses/{userId}/{expenseId}", userId, expenseId)
+                .with(csrf())
+                .with(user("test").password("test123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
         ).andExpectAll(status().isOk());
     }
 

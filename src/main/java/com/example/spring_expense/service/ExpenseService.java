@@ -1,6 +1,7 @@
 package com.example.spring_expense.service;
 
 import com.example.spring_expense.dto.CreateExpenseRequest;
+import com.example.spring_expense.dto.UpdateExpenseRequest;
 import com.example.spring_expense.entity.Category;
 import com.example.spring_expense.entity.Expense;
 import com.example.spring_expense.entity.User;
@@ -48,6 +49,21 @@ public class ExpenseService {
         }
 
         return expenseRepository.findByUserId(userId);
+    }
+
+    public void updateExpense(UpdateExpenseRequest request, Long expenseId, Long userId) {
+        validationService.validate(request);
+
+        Expense expense = expenseRepository.findById(expenseId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense not found"));
+
+        if(!expense.getUser().getId().equals(userId)) {
+           throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not allowed to update this expense");
+        }
+
+        expense.setAmount(request.getAmount());
+        expense.setDescription(request.getDescription());
+
+        expenseRepository.save(expense);
     }
 
 

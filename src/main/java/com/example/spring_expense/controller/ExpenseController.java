@@ -1,6 +1,7 @@
 package com.example.spring_expense.controller;
 
 import com.example.spring_expense.dto.CreateExpenseRequest;
+import com.example.spring_expense.dto.UpdateExpenseRequest;
 import com.example.spring_expense.dto.WebResponse;
 import com.example.spring_expense.entity.Expense;
 import com.example.spring_expense.service.ExpenseService;
@@ -27,5 +28,12 @@ public class ExpenseController {
         List<Expense> allExpenses = expenseService.getAllExpenses(userId);
 
         return WebResponse.<List<Expense>>builder().status(200).message("All expenses retrieved").data(allExpenses).build();
+    }
+
+    @PatchMapping(path = "/api/expenses/{userId}/{expenseId}")
+    public WebResponse<String> update(@PathVariable Long userId, @PathVariable Long expenseId, UpdateExpenseRequest request) {
+        expenseService.updateExpense(request, expenseId, userId);
+
+       return WebResponse.<String>builder().message("Expense updated successfully").status(200).build() ;
     }
 }
