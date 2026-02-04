@@ -31,7 +31,7 @@ public class ExpenseController {
     }
 
     @PatchMapping(path = "/api/expenses/{userId}/{expenseId}")
-    public WebResponse<String> update(@PathVariable Long userId, @PathVariable Long expenseId, UpdateExpenseRequest request) {
+    public WebResponse<String> update(@PathVariable Long userId, @PathVariable Long expenseId, @RequestBody UpdateExpenseRequest request) {
         expenseService.updateExpense(request, expenseId, userId);
 
        return WebResponse.<String>builder().message("Expense updated successfully").status(200).build() ;
