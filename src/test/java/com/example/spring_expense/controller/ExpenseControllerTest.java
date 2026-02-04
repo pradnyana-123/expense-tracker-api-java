@@ -69,7 +69,7 @@ public class ExpenseControllerTest {
 
         CreateExpenseRequest request = new CreateExpenseRequest();
 
-        BigDecimal amount = new BigDecimal("200.000");
+        BigDecimal amount = new BigDecimal("200000.00");
 
         request.setAmount(amount);
         request.setDescription("Buy some veggies, meat, and water");
@@ -256,5 +256,182 @@ public class ExpenseControllerTest {
         ).andExpectAll(status().isOk());
     }
 
+
+    @Test
+    void testUpdateExpenseInvalidData() throws Exception {
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(encoder.encode("test123"));
+
+        userRepository.save(user);
+
+        String userId = user.getId().toString();
+
+        Expense expense = new Expense();
+        expense.setAmount(new BigDecimal("100000.00"));
+        expense.setDescription("Buying groceries");
+        expense.setUser(user);
+
+        expenseRepository.save(expense);
+
+        String expenseId = expense.getId().toString();
+
+        UpdateExpenseRequest request = new UpdateExpenseRequest();
+        request.setAmount(new BigDecimal("100.000"));
+        request.setDescription("");
+
+        mockMvc.perform(patch("/api/expenses/{userId}/{expenseId}", userId, expenseId)
+                .with(csrf())
+                .with(user("test").password("test123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(status().isBadRequest());
+    }
+
+    @Test
+    void testUpdateExpenseNotFound() throws Exception {
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(encoder.encode("test123"));
+
+        userRepository.save(user);
+
+        String userId = user.getId().toString();
+
+        Expense expense = new Expense();
+        expense.setAmount(new BigDecimal("100000.00"));
+        expense.setDescription("Buying groceries");
+        expense.setUser(user);
+
+        expenseRepository.save(expense);
+
+        Long expenseId = expense.getId() + 2;
+
+        UpdateExpenseRequest request = new UpdateExpenseRequest();
+        request.setAmount(new BigDecimal("100000.00"));
+        request.setDescription("Whatever");
+
+        mockMvc.perform(patch("/api/expenses/{userId}/{expenseId}", userId, expenseId.toString())
+                .with(csrf())
+                .with(user("test").password("test123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(status().isNotFound());
+    }
+
+    @Test
+    void testUpdateExpenseUserUnauthorized() throws Exception {
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(encoder.encode("test123"));
+
+        userRepository.save(user);
+
+        Long userId = user.getId() + 2;
+
+        Expense expense = new Expense();
+        expense.setAmount(new BigDecimal("100000.00"));
+        expense.setDescription("Buying groceries");
+        expense.setUser(user);
+
+        expenseRepository.save(expense);
+
+        String expenseId = expense.getId().toString();
+
+        UpdateExpenseRequest request = new UpdateExpenseRequest();
+        request.setAmount(new BigDecimal("100000.00"));
+        request.setDescription("Whatever");
+
+        mockMvc.perform(patch("/api/expenses/{userId}/{expenseId}", userId, expenseId)
+                .with(csrf())
+                .with(user("test").password("test123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request))
+        ).andExpectAll(status().isUnauthorized());
+    }
+
+    @Test
+    void testDeleteExpenseSuccess() throws Exception {
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(encoder.encode("test123"));
+
+        userRepository.save(user);
+
+        Long userId = user.getId();
+
+        Expense expense = new Expense();
+        expense.setAmount(new BigDecimal("100000.00"));
+        expense.setDescription("Buying groceries");
+        expense.setUser(user);
+
+        expenseRepository.save(expense);
+
+        String expenseId = expense.getId().toString();
+
+        mockMvc.perform(delete("/api/expenses/{userId}/{expenseId}", userId, expenseId)
+                .with(csrf())
+                .with(user("test").password("test123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(status().isOk());
+    }
+
+    @Test
+    void testDeleteExpenseNotFound() throws Exception {
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(encoder.encode("test123"));
+
+        userRepository.save(user);
+
+        Long userId = user.getId();
+
+        Expense expense = new Expense();
+        expense.setAmount(new BigDecimal("100000.00"));
+        expense.setDescription("Buying groceries");
+        expense.setUser(user);
+
+        expenseRepository.save(expense);
+
+        Long expenseId = expense.getId() + 2;
+
+        mockMvc.perform(delete("/api/expenses/{userId}/{expenseId}", userId, expenseId)
+                .with(csrf())
+                .with(user("test").password("test123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(status().isNotFound());
+    }
+
+    @Test
+    void testDeleteExpenseUserUnauthorized() throws Exception {
+        User user = new User();
+        user.setUsername("test");
+        user.setPassword(encoder.encode("test123"));
+
+        userRepository.save(user);
+
+        Long userId = user.getId() + 2;
+
+        Expense expense = new Expense();
+        expense.setAmount(new BigDecimal("100000.00"));
+        expense.setDescription("Buying groceries");
+        expense.setUser(user);
+
+        expenseRepository.save(expense);
+
+        String expenseId = expense.getId().toString();
+
+        mockMvc.perform(delete("/api/expenses/{userId}/{expenseId}", userId.toString(), expenseId)
+                .with(csrf())
+                .with(user("test").password("test123"))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON)
+        ).andExpectAll(status().isUnauthorized());
+    }
 
 }

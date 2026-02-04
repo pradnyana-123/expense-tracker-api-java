@@ -66,5 +66,16 @@ public class ExpenseService {
         expenseRepository.save(expense);
     }
 
+    public void deleteExpense(Long userId, Long expenseId) {
+        Expense expense = expenseRepository.findById(expenseId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Expense not found"));
+
+        if(!expense.getUser().getId().equals(userId)) {
+            throw new ResponseStatusException(HttpStatus.UNAUTHORIZED, "You are not allowed to delete this expense");
+        }
+
+        expenseRepository.delete(expense);
+    }
+
+
 
 }

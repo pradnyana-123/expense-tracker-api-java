@@ -36,4 +36,11 @@ public class ExpenseController {
 
        return WebResponse.<String>builder().message("Expense updated successfully").status(200).build() ;
     }
+
+    @DeleteMapping(path = "/api/expenses/{userId}/{expenseId}")
+    public WebResponse<String> delete(@PathVariable Long userId, @PathVariable Long expenseId) {
+        expenseService.deleteExpense(userId, expenseId);
+
+        return WebResponse.<String>builder().message("Expense deleted successfully").status(200).build();
+    }
 }
