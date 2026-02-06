@@ -1,6 +1,7 @@
 package com.example.spring_expense.service;
 
 import com.example.spring_expense.dto.CreateExpenseRequest;
+import com.example.spring_expense.dto.ExpenseResponse;
 import com.example.spring_expense.dto.UpdateExpenseRequest;
 import com.example.spring_expense.entity.Category;
 import com.example.spring_expense.entity.Expense;
@@ -9,6 +10,8 @@ import com.example.spring_expense.repository.CategoryRepository;
 import com.example.spring_expense.repository.ExpenseRepository;
 import com.example.spring_expense.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Slice;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
@@ -49,6 +52,28 @@ public class ExpenseService {
         }
 
         return expenseRepository.findByUserId(userId);
+    }
+
+    public Slice<ExpenseResponse> getExpensesPaginated(Long userId, Long lastId, int size) {
+        Long cursor = (lastId == null) ?  0L : lastId;
+
+        Slice<Expense> expensesPaginated = expenseRepository.findByUserIdAndIdGreaterThanOrderByIdAsc(userId, cursor, PageRequest.of(0, size));
+
+        Slice<ExpenseResponse> map = expensesPaginated.map(expense -> {
+            ExpenseResponse dto = new ExpenseResponse();
+            dto.setId(expense.getId());
+            dto.setAmount(expense.getAmount());
+            dto.setDescription(expense.getDescription());
+            dto.setTransactionDate(expense.getTransactionDate());
+
+            if (expense.getUser() != null) {
+                dto.setUsername(expense.getUser().getUsername());
+            }
+
+            return dto;
+        });
+
+        return map;
     }
 
     public void updateExpense(UpdateExpenseRequest request, Long expenseId, Long userId) {

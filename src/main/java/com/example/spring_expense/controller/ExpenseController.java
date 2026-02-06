@@ -1,11 +1,13 @@
 package com.example.spring_expense.controller;
 
 import com.example.spring_expense.dto.CreateExpenseRequest;
+import com.example.spring_expense.dto.ExpenseResponse;
 import com.example.spring_expense.dto.UpdateExpenseRequest;
 import com.example.spring_expense.dto.WebResponse;
 import com.example.spring_expense.entity.Expense;
 import com.example.spring_expense.service.ExpenseService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Slice;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -21,6 +23,13 @@ public class ExpenseController {
         expenseService.createExpense(request, userId);
 
         return WebResponse.<String>builder().message("Expense created successfully").status(201).build();
+    }
+
+    @GetMapping(path = "/api/expenses/{userId}/paginate")
+    public WebResponse<Slice<ExpenseResponse>> getAllPaginated(@PathVariable Long userId, @RequestParam Long cursor, @RequestParam int size) {
+        Slice<ExpenseResponse> expensesPaginated = expenseService.getExpensesPaginated(userId, cursor, size);
+
+        return WebResponse.<Slice<ExpenseResponse>>builder().status(200).message("All expenses retrieved").data(expensesPaginated).build();
     }
 
     @GetMapping(path = "/api/expenses/{userId}")
